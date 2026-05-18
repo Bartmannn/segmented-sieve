@@ -32,17 +32,30 @@ func standardSieve(end int) []int {
 }
 
 func segmentedSieve(start, end int) []int {
+	if start <= 2 {
+		return standardSieve(end)
+	}
+
 	var segmentSize int = end - start + 1
 	var basePrimes []int = standardSieve(int(math.Sqrt(float64(end))))
 
 	var isPrime []bool = make([]bool, segmentSize)
 
-	for i := 0; i < len(basePrimes); i++ {
-		p := basePrimes[i]
+	for i := 0; i < segmentSize; i++ {
+		isPrime[i] = true
+	}
 
-		st := ((start + p - 1) / p) * p // the closest bigger or equil number to `start`
-		st -= start                     // gives the starting isPrime's index
-		for j := st; j <= end; j += p {
+	for _, p := range basePrimes {
+		mul := (start + p - 1) / p
+		st := mul * p // the closest bigger or equil number to `start`
+		st -= start   // gives the starting isPrime's index
+
+		// if mul is less than 2, then we should skip one tour
+		if mul < 2 {
+			st += p
+		}
+
+		for j := st; j < segmentSize; j += p {
 			isPrime[j] = false
 		}
 	}
@@ -50,14 +63,14 @@ func segmentedSieve(start, end int) []int {
 	for i := 0; i < segmentSize; i++ {
 		if isPrime[i] {
 			p := start + i
-			for k := p * p; k <= end; k += p {
+			for k := p * p; k < segmentSize; k += p {
 				isPrime[k] = false
 			}
 		}
 	}
 
 	var primes []int
-	for i := 0; i <= segmentSize; i++ {
+	for i := 0; i < segmentSize; i++ {
 		if isPrime[i] {
 			primes = append(primes, start+i)
 		}
