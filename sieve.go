@@ -135,7 +135,7 @@ func genericSegmentedSieve[T Number](start, end T) []T {
 			st += p
 		}
 
-		for j := st; j < segmentSize; j += p {
+		for j := st; j < segmentSize && j >= 0; j += p {
 			isPrime[j] = false
 		}
 	}
@@ -143,7 +143,7 @@ func genericSegmentedSieve[T Number](start, end T) []T {
 	for i := T(0); i < segmentSize; i++ {
 		if isPrime[i] {
 			p := start + i
-			for k := p * p; k < segmentSize; k += p {
+			for k := p * p; k < segmentSize && k >= 0; k += p { // k := p*p is dangerous
 				isPrime[k] = false
 			}
 		}
