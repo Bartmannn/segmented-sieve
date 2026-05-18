@@ -5,6 +5,25 @@ import (
 	"testing"
 )
 
+func changeArrType[T1, T2 Number](arr []T1) []T2 {
+	var newArr []T2
+	for _, v := range arr {
+		newArr = append(newArr, T2(v))
+	}
+	return newArr
+}
+
+func testSieveForType[T Number](t *testing.T, typeName string, start, end T, expectedBase []int) {
+	t.Run(typeName, func(t *testing.T) {
+		result := genericSegmentedSieve(start, end)
+		expected := changeArrType[int, T](expectedBase)
+
+		if !reflect.DeepEqual(result, expected) {
+			t.Errorf("ERROR: for %s datatype expected %v, but got %v", typeName, expected, result)
+		}
+	})
+}
+
 func TestSegmentedSieve(t *testing.T) {
 	low1 := 10
 	high1 := 30
@@ -68,4 +87,21 @@ func TestEdgeCases(t *testing.T) {
 	if len(res2) != 0 {
 		t.Errorf("BŁĄD dla [14, 16]: oczekiwano braku liczb pierwszych, otrzymano %v", res2)
 	}
+}
+
+func TestGenericSieves(t *testing.T) {
+	var expected []int = []int{53, 59, 61, 67, 71, 73, 79, 83, 89, 97,
+		101, 103, 107, 109, 113, 127}
+
+	testSieveForType[int8](t, "int8", 50, 127, expected)
+	testSieveForType[int16](t, "int16", 50, 127, expected)
+	testSieveForType[int32](t, "int32", 50, 127, expected)
+	testSieveForType[int64](t, "int64", 50, 127, expected)
+	testSieveForType(t, "int", 50, 127, expected)
+
+	testSieveForType[uint8](t, "uint8", 50, 127, expected)
+	testSieveForType[uint16](t, "uint16", 50, 127, expected)
+	testSieveForType[uint32](t, "uint32", 50, 127, expected)
+	testSieveForType[uint64](t, "uint64", 50, 127, expected)
+	testSieveForType[uint](t, "uint", 50, 127, expected)
 }
