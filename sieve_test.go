@@ -5,6 +5,28 @@ import (
 	"testing"
 )
 
+func isPrimeNaive[T Number](n T) bool {
+	if n < 2 {
+		return false
+	}
+	for i := T(2); i <= n/i; i++ {
+		if n%i == 0 {
+			return false
+		}
+	}
+	return true
+}
+
+func getPrimesNaive[T Number](low, high T) []T {
+	var primes []T
+	for i := low; i <= high && i > 0; i++ {
+		if isPrimeNaive(i) {
+			primes = append(primes, i)
+		}
+	}
+	return primes
+}
+
 func changeArrType[T1, T2 Number](arr []T1) []T2 {
 	var newArr []T2
 	for _, v := range arr {
@@ -104,4 +126,37 @@ func TestGenericSieves(t *testing.T) {
 	testSieveForType[uint32](t, "uint32", 50, 127, expected)
 	testSieveForType[uint64](t, "uint64", 50, 127, expected)
 	testSieveForType[uint](t, "uint", 50, 127, expected)
+}
+
+func TestSegmentedSieveAgainstNaive(t *testing.T) {
+	start, end := prepareRange[uint8](8)
+
+	expected := getPrimesNaive(start, end)
+	result := genericSegmentedSieve(start, end)
+
+	if len(result) != len(expected) {
+		t.Errorf("BŁĄD: Wyrocznia znalazła %d liczb, a Twoje sito %d!", len(expected), len(result))
+	}
+
+	expectedMap := make(map[uint8]bool)
+	for _, v := range expected {
+		expectedMap[v] = true
+	}
+
+	resultMap := make(map[uint8]bool)
+	for _, v := range result {
+		resultMap[v] = true
+	}
+
+	for num := range expectedMap {
+		if !resultMap[num] {
+			t.Errorf("Zgubiłeś liczbę pierwszą: %d", num)
+		}
+	}
+
+	for num := range resultMap {
+		if !expectedMap[num] {
+			t.Errorf("Błędnie sklasyfikowałeś jako pierwszą: %d (to jest liczba złożona!)", num)
+		}
+	}
 }
