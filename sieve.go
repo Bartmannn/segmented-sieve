@@ -9,6 +9,19 @@ type Number interface {
 		uint | uint8 | uint16 | uint32 | uint64
 }
 
+type Wheel235 struct {
+	Steps    [8]uint8
+	IndexMap [30]uint8
+}
+
+var Wheel = &Wheel235{
+	Steps: [8]uint8{6, 4, 2, 4, 2, 4, 6, 2},
+	IndexMap: [30]uint8{
+		1: 0, 7: 1, 11: 2, 13: 3,
+		17: 4, 19: 5, 23: 6, 29: 7,
+	},
+}
+
 func standardSieve(end int) []int {
 	isPrime := make([]bool, end+1)
 
@@ -126,26 +139,57 @@ func genericSegmentedSieve[T Number](start, end T) []T {
 	}
 
 	for _, p := range basePrimes {
-		mul := (start + p - 1) / p
-		st := mul * p // the closest bigger or equil number to `start`
-		st -= start   // gives the starting isPrime's index
-
-		// if mul is less than 2, then we should skip one tour
-		if mul < 2 {
-			st += p
+		if p == 2 || p == 3 || p == 5 { // Because of Wheel235
+			continue
 		}
 
-		for j := st; j < segmentSize && j >= 0; j += p {
-			isPrime[j] = false
+		mul := (start + p - 1) / p
+		if mul%2 == 0 {
+			mul += 1
+		}
+		for mul%3 == 0 || mul%5 == 0 {
+			mul += 2
+		}
+
+		wheelIdx := Wheel.IndexMap[mul%30]
+		stepMultiplier := Wheel.Steps[wheelIdx]
+
+		st := mul * p // the closest bigger or equil number to `start`
+		st -= start
+
+		for st < segmentSize && st+T(stepMultiplier)*p > st {
+			isPrime[st] = false
+			st += T(stepMultiplier) * p
+			wheelIdx = (wheelIdx + 1) % 8
+			stepMultiplier = Wheel.Steps[wheelIdx]
 		}
 	}
 
 	var primes []T
-	for i := T(0); i < segmentSize; i++ {
-		if isPrime[i] {
-			primes = append(primes, start+i)
-		}
+
+	curr := start
+	for curr%2 == 0 || curr%3 == 0 || curr%5 == 0 {
+		curr += 1
 	}
+
+	wheelIdx := Wheel.IndexMap[curr%30]
+	step := T(Wheel.Steps[wheelIdx])
+
+	for curr <= end && curr+step > curr && curr >= 0 {
+		if isPrime[curr-start] {
+			primes = append(primes, curr)
+		}
+		curr += step
+		wheelIdx = (wheelIdx + 1) % 8
+		step = T(Wheel.Steps[wheelIdx])
+	}
+
+	// var primes []T
+	// for i := T(0); i < segmentSize; i++ {
+	// 	if isPrime[i] {
+	// 		primes = append(primes, start+i)
+	// 	}
+	// }
 
 	return primes
 }
