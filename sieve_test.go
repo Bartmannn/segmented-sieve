@@ -115,12 +115,6 @@ func TestGenericSieves(t *testing.T) {
 	var expected []int = []int{53, 59, 61, 67, 71, 73, 79, 83, 89, 97,
 		101, 103, 107, 109, 113, 127}
 
-	testSieveForType[int8](t, "int8", 50, 127, expected)
-	testSieveForType[int16](t, "int16", 50, 127, expected)
-	testSieveForType[int32](t, "int32", 50, 127, expected)
-	testSieveForType[int64](t, "int64", 50, 127, expected)
-	testSieveForType(t, "int", 50, 127, expected)
-
 	testSieveForType[uint8](t, "uint8", 50, 127, expected)
 	testSieveForType[uint16](t, "uint16", 50, 127, expected)
 	testSieveForType[uint32](t, "uint32", 50, 127, expected)

@@ -9,6 +9,18 @@ type Number interface {
 		uint | uint8 | uint16 | uint32 | uint64
 }
 
+type Job[T Number] struct {
+	ID    uint64
+	Start T
+	End   T
+}
+
+type Result struct {
+	ID   uint64
+	Data []byte
+	Err  error
+}
+
 type Wheel235 struct {
 	Steps    [8]uint8
 	IndexMap [30]uint8
